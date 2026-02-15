@@ -1,0 +1,2 @@
+# Movers Platform
+This project is a web-based platform built with Django that connects people who are moving houses with moving companies or individuals who own trucks and offer moving services. This platform centralizes the process of moving by allowing users to request moving services and get connected to verified movers in their area. Users can describe their move (location, items, date, budget), while movers can browse requests or receive job offers and accept them. The platform acts as the middleman that brings the two together.

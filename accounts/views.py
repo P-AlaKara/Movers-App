@@ -9,6 +9,9 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            role = form.cleaned_data.get("role")
+            user.profile.role = role
+            user.profile.save()
             login(request, user)
             return redirect('dashboard')  # Redirect to a success page after registration
     else:
