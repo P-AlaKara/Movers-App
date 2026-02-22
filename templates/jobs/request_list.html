@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}My Moving Requests{% endblock %}
+
+{% block content %}
+<h2>My Moving Requests</h2>
+
+<a class="button is-primary" href="{% url 'create_request' %}">Create New Request</a>
+
+{% if requests %}
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pickup</th>
+                <th>Dropoff</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>{{ req.id }}</td>
+                <td>{{ req.pickup_location }}</td>
+                <td>{{ req.dropoff_location }}</td>
+                <td>{{ req.moving_date }}</td>
+                <td>{{ req.status }}</td>
+                <td>
+                    <a class="button is-small is-link" href="{% url 'request_detail' req.id %}">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No moving requests yet.</p>
+{% endif %}
+{% endblock %}

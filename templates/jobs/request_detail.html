@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Request Detail{% endblock %}
+
+{% block content %}
+<h2>Moving Request #{{ request_obj.id }}</h2>
+<p><strong>Pickup:</strong> {{ request_obj.pickup_location }}</p>
+<p><strong>Dropoff:</strong> {{ request_obj.dropoff_location }}</p>
+<p><strong>Date:</strong> {{ request_obj.moving_date }}</p>
+<p><strong>Items:</strong> {{ request_obj.item_description }}</p>
+<p><strong>Budget:</strong> {{ request_obj.budget }}</p>
+<p><strong>Status:</strong> {{ request_obj.status }}</p>
+
+{% if request_obj.status == 'pending' %}
+<h3>Assign a Mover</h3>
+<form method="POST" action="{% url 'accept_mover' request_obj.id %}">
+    {% csrf_token %}
+    <div class="field">
+        <div class="control">
+            <select name="mover_id" class="input">
+                <option value="">Select a mover in your area</option>
+                {% for mover in movers %}
+                    <option value="{{ mover.user.id }}">{{ mover.user.username }} ({{ mover.service_area }})</option>
+                {% empty %}
+                    <option disabled>No movers available in your area</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="button is-primary">Assign Mover</button>
+</form>
+{% endif %}
+
+{% endblock %}

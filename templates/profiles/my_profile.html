@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>My Profile</h2>
+
+<p><strong>Username:</strong> {{ request.user.username }}</p>
+<p><strong>Email:</strong> {{ request.user.email }}</p>
+<p><strong>Role:</strong> {{ profile.role }}</p>
+
+<hr>
+
+<form method="POST">
+    {% csrf_token %}
+    
+    <h3>Basic Info</h3>
+    {{ profile_form.as_p }}
+
+    {% if mover_form %}
+        <h3>Mover Details</h3>
+        {{ mover_form.as_p }}
+    {% endif %}
+
+    <button type="submit">Update Profile</button>
+</form>
+
+{% endblock %}
