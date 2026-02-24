@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Mover Dashboard{% endblock %}
+
+{% block content %}
+
+<h2 class="title mb-4">Mover Dashboard</h2>
+
+<!-- Stats Row -->
+<div class="columns">
+  <div class="column">
+    <div class="box has-background-light">
+      <p>Total Jobs</p>
+      <h3 class="title">{{ stats.total }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-warning-light">
+      <p>Assigned</p>
+      <h3 class="title">{{ stats.assigned }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-info-light">
+      <p>In Progress</p>
+      <h3 class="title">{{ stats.in_progress }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-success-light">
+      <p>Completed</p>
+      <h3 class="title">{{ stats.completed }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-danger-light">
+      <p>Cancelled</p>
+      <h3 class="title">{{ stats.cancelled }}</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="buttons mb-4">
+  <a class="button" href="{% url 'dashboard' %}">All</a>
+  <a class="button is-warning" href="?status=assigned">Assigned</a>
+  <a class="button is-info" href="?status=in_progress">In Progress</a>
+  <a class="button is-success" href="?status=completed">Completed</a>
+  <a class="button is-danger" href="?status=cancelled">Cancelled</a>
+</div>
+
+{% if jobs %}
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th>Job ID</th>
+      <th>Pickup</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>#{{ job.moving_request.id }}</td>
+      <td>{{ job.moving_request.pickup_location }}</td>
+      <td>{{ job.moving_request.moving_date }}</td>
+      <td>
+        <span class="tag
+          {% if job.status == 'assigned' %}is-warning
+          {% elif job.status == 'in_progress' %}is-info
+          {% elif job.status == 'completed' %}is-success
+          {% elif job.status == 'cancelled' %}is-danger
+          {% endif %}">
+          {{ job.status|capfirst }}
+        </span>
+      </td>
+      <td>
+        {% if job.status == 'assigned' %}
+          <a class="button is-small is-success"
+             href="{% url 'accept_job' job.moving_request.id %}">
+             Start
+          </a>
+          <a class="button is-small is-danger"
+             href="{% url 'cancel_job' job.moving_request.id %}">
+             Cancel
+          </a>
+
+        {% elif job.status == 'in_progress' %}
+          <a class="button is-small is-primary"
+             href="{% url 'complete_job' job.moving_request.id %}">
+             Complete
+          </a>
+          <a class="button is-small is-danger"
+             href="{% url 'cancel_job' job.moving_request.id %}">
+             Cancel
+          </a>
+
+        {% else %}
+          <span class="tag is-light">No actions</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No jobs found.</p>
+{% endif %}
+
+{% endblock %}

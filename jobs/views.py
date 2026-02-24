@@ -19,6 +19,8 @@ def create_request_view(request):
             moving_request.status = 'pending'
             moving_request.save()
             return redirect("dashboard")
+        else:
+            print(form.errors)  # For debugging purposes
     else:
         form = MovingRequestForm()
 
@@ -156,3 +158,42 @@ def complete_job(request, request_id):
         moving_request.save()
 
     return redirect('my_jobs')
+
+@login_required
+def cancel_request(request, request_id):
+    moving_request = get_object_or_404(
+        MovingRequest,
+        id=request_id,
+        customer=request.user
+    )
+
+    if moving_request.status in ['pending', 'accepted']:
+        moving_request.status = 'cancelled'
+        moving_request.save()
+
+        # If job exists, cancel it too
+        try:
+            job = moving_request.jobassignment
+            job.status = 'cancelled'
+            job.save()
+        except JobAssignment.DoesNotExist:
+            pass
+
+    return redirect('dashboard')
+
+@login_required
+def cancel_job(request, request_id):
+    job = get_object_or_404(
+        JobAssignment,
+        moving_request__id=request_id,
+        mover=request.user
+    )
+
+    if job.status in ['assigned', 'in_progress']:
+        job.status = 'cancelled'
+        job.save()
+
+        job.moving_request.status = 'pending'
+        job.moving_request.save()
+
+    return redirect('dashboard')

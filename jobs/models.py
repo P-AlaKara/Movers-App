@@ -7,6 +7,7 @@ class MovingRequest(models.Model):
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
         ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
     )
 
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -31,6 +32,7 @@ class JobAssignment(models.Model):
             ('assigned', 'Assigned'),
             ('in_progress', 'In Progress'),
             ('completed', 'Completed'),
+            ('cancelled', 'Cancelled'),
         ),
         default='assigned'
     )

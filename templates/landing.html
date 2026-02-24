@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero">
+    <h1>Move smarter, not harder.</h1>
+    <p>Connecting customers with trusted movers in their area.</p>
+
+    <div class="cta-buttons">
+        <a href="{% url 'register' %}" class="btn primary">Get Started</a>
+        <a href="{% url 'login' %}" class="btn secondary">Login</a>
+    </div>
+</section>
+
+<section class="features">
+    <div class="card">
+        <h3>Post a Move</h3>
+        <p>Create a moving request in seconds.</p>
+    </div>
+    <div class="card">
+        <h3>Choose a Mover</h3>
+        <p>Pick from verified movers in your area.</p>
+    </div>
+    <div class="card">
+        <h3>Track Progress</h3>
+        <p>Manage jobs from your dashboard.</p>
+    </div>
+</section>
+
+{% endblock %}

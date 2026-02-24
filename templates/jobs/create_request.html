@@ -2,6 +2,16 @@
 
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+
+    {{ form.non_field_errors }}
+
+    {% for field in form %}
+        <div>
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </div>
+    {% endfor %}
+
     <button type="submit">Submit</button>
 </form>

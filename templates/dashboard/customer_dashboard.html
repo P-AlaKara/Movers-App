@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Customer Dashboard{% endblock %}
+
+<div class="section">
+  <div class="container">
+    {% block content %}
+
+    <h2 class="title mb-4">Customer Dashboard</h2>
+
+    <!-- Stats Row -->
+    <div class="columns">
+      <div class="column">
+        <div class="box has-background-light">
+          <p>Total Requests</p>
+          <h3 class="title">{{ stats.total }}</h3>
+        </div>
+      </div>
+      <div class="column">
+        <div class="box has-background-warning-light">
+          <p>Pending</p>
+          <h3 class="title">{{ stats.pending }}</h3>
+        </div>
+      </div>
+      <div class="column">
+        <div class="box has-background-info-light">
+          <p>Accepted</p>
+          <h3 class="title">{{ stats.accepted }}</h3>
+        </div>
+      </div>
+      <div class="column">
+        <div class="box has-background-success-light">
+          <p>Completed</p>
+          <h3 class="title">{{ stats.completed }}</h3>
+        </div>
+      </div>
+      <div class="column">
+        <div class="box has-background-danger-light">
+          <p>Cancelled</p>
+          <h3 class="title">{{ stats.cancelled }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="buttons mb-4">
+      <a class="button" href="{% url 'dashboard' %}">All</a>
+      <a class="button is-warning" href="?status=pending">Pending</a>
+      <a class="button is-info" href="?status=accepted">Accepted</a>
+      <a class="button is-success" href="?status=completed">Completed</a>
+      <a class="button is-danger" href="?status=cancelled">Cancelled</a>
+    </div>
+
+    <a class="button is-primary mb-4" href="{% url 'create_request' %}">
+      + Create New Request
+    </a>
+
+    {% if requests %}
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Pickup</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in requests %}
+        <tr>
+          <td>#{{ request.id }}</td>
+          <td>{{ request.pickup_location }}</td>
+          <td>{{ request.moving_date }}</td>
+          <td>
+            <span class="tag
+              {% if request.status == 'pending' %}is-warning
+              {% elif request.status == 'accepted' %}is-info
+              {% elif request.status == 'completed' %}is-success
+              {% elif request.status == 'cancelled' %}is-danger
+              {% endif %}">
+              {{ request.status|capfirst }}
+            </span>
+          </td>
+          <td>
+            <a class="button is-small"
+              href="{% url 'request_detail' request.id %}">
+              View
+            </a>
+
+            {% if request.status == 'pending' or request.status == 'accepted' %}
+            <a class="button is-small is-danger"
+              href="{% url 'cancel_request' request.id %}">
+              Cancel
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No requests found.</p>
+    {% endif %}
+
+    {% endblock %}
+  </div>
+</div>
