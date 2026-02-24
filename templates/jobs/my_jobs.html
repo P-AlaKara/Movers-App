@@ -15,6 +15,7 @@
             <th>Date</th>
             <th>Customer</th>
             <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +27,23 @@
             <td>{{ job.moving_request.moving_date }}</td>
             <td>{{ job.moving_request.customer.username }}</td>
             <td>{{ job.status }}</td>
+            <td>
+                {% if job.status == 'assigned' %}
+                    <a class="button is-small is-success"
+                    href="{% url 'accept_job' job.moving_request.id %}">
+                    Start Job
+                    </a>
+
+                {% elif job.status == 'in_progress' %}
+                    <a class="button is-small is-primary"
+                    href="{% url 'complete_job' job.moving_request.id %}">
+                    Mark as Completed
+                    </a>
+
+                {% else %}
+                    <span class="tag is-success">Completed</span>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>

@@ -6,7 +6,8 @@ from .views import (
     available_jobs,
     accept_job,
     my_jobs,
-    accept_mover
+    accept_mover, 
+    complete_job
 )
 
 urlpatterns = [
@@ -17,4 +18,5 @@ urlpatterns = [
     path('jobs/<int:request_id>/accept/', accept_job, name='accept_job'),
     path('jobs/my-jobs/', my_jobs, name='my_jobs'),
     path('requests/<int:request_id>/accept-mover/', accept_mover, name='accept_mover'),
+    path('jobs/<int:request_id>/complete/', complete_job, name='complete_job'),
 ]

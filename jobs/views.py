@@ -132,3 +132,27 @@ def accept_mover(request, request_id):
 
     # If GET, redirect to request detail
     return redirect('request_detail', request_id=request_id)
+
+@login_required
+def complete_job(request, request_id):
+    """
+    Mover marks a job as completed.
+    """
+    if request.user.profile.role != 'mover':
+        return redirect('dashboard')
+
+    job_assignment = get_object_or_404(
+        JobAssignment,
+        moving_request__id=request_id,
+        mover=request.user
+    )
+
+    if job_assignment.status == 'in_progress':
+        job_assignment.status = 'completed'
+        job_assignment.save()
+
+        moving_request = job_assignment.moving_request
+        moving_request.status = 'completed'
+        moving_request.save()
+
+    return redirect('my_jobs')
