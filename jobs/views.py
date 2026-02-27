@@ -61,7 +61,13 @@ def available_jobs(request):
         pickup_location__icontains=mover_profile.service_area
     ).order_by('moving_date')
 
-    return render(request, 'jobs/available_jobs.html', {'jobs': jobs})
+    existing_bids = Bid.objects.filter(
+        mover=request.user,
+        moving_request__in=jobs
+    ).values_list('moving_request_id', flat=True)
+
+    return render(request, 'jobs/available_jobs.html', 
+                  {'jobs': jobs, 'existing_bids': existing_bids})
 
 @login_required
 def place_bid(request, request_id):

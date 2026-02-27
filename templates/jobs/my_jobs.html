@@ -21,22 +21,22 @@
     <tbody>
         {% for job in jobs %}
         <tr>
-            <td>{{ job.moving_request.id }}</td>
-            <td>{{ job.moving_request.pickup_location }}</td>
-            <td>{{ job.moving_request.dropoff_location }}</td>
-            <td>{{ job.moving_request.moving_date }}</td>
-            <td>{{ job.moving_request.customer.username }}</td>
+            <td>{{ job.id }}</td>
+            <td>{{ job.pickup_location }}</td>
+            <td>{{ job.dropoff_location }}</td>
+            <td>{{ job.moving_date }}</td>
+            <td>{{ job.customer.username }}</td>
             <td>{{ job.status }}</td>
             <td>
                 {% if job.status == 'assigned' %}
                     <a class="button is-small is-success"
-                    href="{% url 'accept_job' job.moving_request.id %}">
+                    href="{% url 'accept_job' job.id %}">
                     Start Job
                     </a>
 
                 {% elif job.status == 'in_progress' %}
                     <a class="button is-small is-primary"
-                    href="{% url 'complete_job' job.moving_request.id %}">
+                    href="{% url 'complete_job' job.id %}">
                     Mark as Completed
                     </a>
 

@@ -17,8 +17,8 @@
       </div>
       <div class="column">
         <div class="box has-background-warning-light">
-          <p>Pending</p>
-          <h3 class="title">{{ stats.pending }}</h3>
+          <p>Open</p>
+          <h3 class="title">{{ stats.open }}</h3>
         </div>
       </div>
       <div class="column">
@@ -44,7 +44,7 @@
     <!-- Filters -->
     <div class="buttons mb-4">
       <a class="button" href="{% url 'dashboard' %}">All</a>
-      <a class="button is-warning" href="?status=pending">Pending</a>
+      <a class="button is-warning" href="?status=open">Open</a>
       <a class="button is-info" href="?status=accepted">Accepted</a>
       <a class="button is-success" href="?status=completed">Completed</a>
       <a class="button is-danger" href="?status=cancelled">Cancelled</a>

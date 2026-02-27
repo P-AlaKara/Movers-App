@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Place Bid{% endblock %}
+
+{% block content %}
+
+<h2 class="title mb-4">Place Bid</h2>
+
+<div class="box">
+  <h4 class="subtitle">Job Details</h4>
+
+  <p><strong>Pickup:</strong> {{ request_obj.pickup_location }}</p>
+  <p><strong>Dropoff:</strong> {{ request_obj.dropoff_location }}</p>
+  <p><strong>Date:</strong> {{ request_obj.moving_date }}</p>
+  <p><strong>Status:</strong> {{ request_obj.status|capfirst }}</p>
+</div>
+
+<div class="box">
+  <h4 class="subtitle">Your Offer</h4>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button class="button is-primary" type="submit">
+      Submit Bid
+    </button>
+
+    <a class="button is-light" href="{% url 'available_jobs' %}">
+      Cancel
+    </a>
+  </form>
+</div>
+
+{% endblock %}

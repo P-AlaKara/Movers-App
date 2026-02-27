@@ -8,9 +8,13 @@
                 <p><strong>Date:</strong> {{ job.moving_date }}</p>
                 <p><strong>Status:</strong> {{ job.status }}</p>
 
-                <a href="{% url 'place_bid' job.id %}">
-                    <button>Place Bid</button>
-                </a>
+                {% if job.id in existing_bids %}
+                    <span class="tag is-info">Bid Placed</span>
+                {% else %}
+                    <a href="{% url 'place_bid' job.id %}">
+                        <button class="button is-small is-primary">Place Bid</button>
+                    </a>
+                {% endif %}
             </div>
             <hr>
         {% endfor %}
