@@ -1,44 +1,20 @@
-{% extends "base.html" %}
-
-{% block title %}My Assigned Jobs{% endblock %}
-
-{% block content %}
-<h2>Jobs Assigned to You</h2>
+<h2>Available Jobs</h2>
 
 {% if jobs %}
-<table class="table is-fullwidth">
-    <thead>
-        <tr>
-            <th>Job ID</th>
-            <th>Pickup</th>
-            <th>Dropoff</th>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
+    <div class="job-list">
         {% for job in jobs %}
-        <tr>
-            <td>{{ job.moving_request.id }}</td>
-            <td>{{ job.moving_request.pickup_location }}</td>
-            <td>{{ job.moving_request.dropoff_location }}</td>
-            <td>{{ job.moving_request.moving_date }}</td>
-            <td>{{ job.moving_request.customer.username }}</td>
-            <td>{{ job.status }}</td>
-            <td>
-                {% if job.status == 'assigned' %}
-                    <a class="button is-small is-success" href="{% url 'accept_job' job.moving_request.id %}">Start Job</a>
-                {% else %}
-                    <span class="tag is-info">{{ job.status|capfirst }}</span>
-                {% endif %}
-            </td>
-        </tr>
+            <div class="job-card">
+                <h3>{{ job.pickup_location }} → {{ job.dropoff_location }}</h3>
+                <p><strong>Date:</strong> {{ job.moving_date }}</p>
+                <p><strong>Status:</strong> {{ job.status }}</p>
+
+                <a href="{% url 'place_bid' job.id %}">
+                    <button>Place Bid</button>
+                </a>
+            </div>
+            <hr>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
 {% else %}
-<p>No jobs have been assigned to you yet.</p>
+    <p>No jobs available in your service area right now.</p>
 {% endif %}
-{% endblock %}

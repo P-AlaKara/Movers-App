@@ -4,23 +4,30 @@ from .views import (
     request_list,
     request_detail,
     available_jobs,
-    accept_job,
     my_jobs,
-    accept_mover, 
     complete_job, 
-    cancel_job,
-    cancel_request
+    cancel_request,
+    place_bid,
+    accept_bid, 
+    cancel_bid,
+    start_job,
 )
 
 urlpatterns = [
+    # Customer request routes
     path("requests/create/", create_request_view, name="create_request"),
-    path('requests/', request_list, name='request_list'),
-    path('requests/<int:request_id>/', request_detail, name='request_detail'),
-    path('jobs/', available_jobs, name='available_jobs'),
-    path('jobs/<int:request_id>/accept/', accept_job, name='accept_job'),
-    path('jobs/my-jobs/', my_jobs, name='my_jobs'),
-    path('requests/<int:request_id>/accept-mover/', accept_mover, name='accept_mover'),
-    path('jobs/<int:request_id>/complete/', complete_job, name='complete_job'),
-    path('requests/<int:request_id>/cancel/', cancel_request, name='cancel_request'),
-    path('jobs/<int:request_id>/cancel/', cancel_job, name='cancel_job'),
+    path("requests/", request_list, name="request_list"),
+    path("requests/<int:request_id>/", request_detail, name="request_detail"),
+    path("requests/<int:request_id>/cancel/", cancel_request, name="cancel_request"),
+
+    # Bidding system
+    path("jobs/available/", available_jobs, name="available_jobs"),
+    path("jobs/<int:request_id>/bid/", place_bid, name="place_bid"),
+    path("bids/<int:bid_id>/accept/", accept_bid, name="accept_bid"),
+    path("bids/<int:bid_id>/cancel/", cancel_bid, name="cancel_bid"),
+
+    # Mover job lifecycle
+    path("jobs/my/", my_jobs, name="my_jobs"),
+    path("jobs/<int:request_id>/start/", start_job, name="start_job"),
+    path("jobs/<int:request_id>/complete/", complete_job, name="complete_job"),
 ]
