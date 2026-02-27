@@ -6,9 +6,31 @@ body {
     font-weight: 700;
 }
 
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.hero.is-primary {
+    /* gradient over a stock moving image */
+    background: linear-gradient(rgba(50,115,220,0.75), rgba(54,63,253,0.75)),
+      url('https://source.unsplash.com/1600x900/?moving') center/cover no-repeat;
+    color: white;
+}
+.hero.is-primary .title,
+.hero.is-primary .subtitle {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
 .box {
     border-radius: 12px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 600px;
+    margin: auto;
 }
 
 .box:hover {
@@ -33,4 +55,29 @@ body {
 .tag {
     font-weight: 600;
     letter-spacing: 0.5px;
+}
+
+form.box input,
+form.box select,
+form.box textarea,
+form.box .input,
+form.box .textarea,
+form.box .select select {
+    width: 100%;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.field {
+    margin-bottom: 1rem;
+}
+
+.footer {
+    padding: 2rem 1rem;
+    background-color: #fafafa;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
 }

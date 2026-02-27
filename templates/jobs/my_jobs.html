@@ -3,10 +3,12 @@
 {% block title %}My Jobs{% endblock %}
 
 {% block content %}
-<h2>My Jobs</h2>
+<section class="section">
+  <div class="container">
+    <h2 class="title">My Jobs</h2>
 
-{% if jobs %}
-<table class="table is-fullwidth">
+    {% if jobs %}
+    <table class="table is-fullwidth">
     <thead>
         <tr>
             <th>ID</th>
@@ -26,18 +28,24 @@
             <td>{{ job.dropoff_location }}</td>
             <td>{{ job.moving_date }}</td>
             <td>{{ job.customer.username }}</td>
-            <td>{{ job.status }}</td>
+            <td>
+                    <span class="tag is-light">
+                        {{ job.status|capfirst }}
+                    </span>
+                </td>
             <td>
                 {% if job.status == 'assigned' %}
                     <a class="button is-small is-success"
                     href="{% url 'accept_job' job.id %}">
-                    Start Job
+                    <span class="icon"><i class="fas fa-play"></i></span>
+                    <span>Start</span>
                     </a>
 
                 {% elif job.status == 'in_progress' %}
                     <a class="button is-small is-primary"
                     href="{% url 'complete_job' job.id %}">
-                    Mark as Completed
+                    <span class="icon"><i class="fas fa-check"></i></span>
+                    <span>Complete</span>
                     </a>
 
                 {% else %}
@@ -51,4 +59,6 @@
 {% else %}
 <p>You have no assigned jobs yet.</p>
 {% endif %}
+  </div>
+</section>
 {% endblock %}

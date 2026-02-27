@@ -1,26 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>My Profile</h2>
+<section class="section">
+  <div class="container">
+    <h2 class="title">My Profile</h2>
 
-<p><strong>Username:</strong> {{ request.user.username }}</p>
-<p><strong>Email:</strong> {{ request.user.email }}</p>
-<p><strong>Role:</strong> {{ profile.role }}</p>
+    <div class="box">
+      <p><strong>Username:</strong> {{ request.user.username }}</p>
+      <p><strong>Email:</strong> {{ request.user.email }}</p>
+      <p><strong>Role:</strong> {{ profile.role|capfirst }}</p>
+    </div>
 
-<hr>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="box">
+        <h3 class="subtitle">Basic Info</h3>
+        {{ profile_form.as_p }}
+      </div>
 
-<form method="POST">
-    {% csrf_token %}
-    
-    <h3>Basic Info</h3>
-    {{ profile_form.as_p }}
+      {% if mover_form %}
+        <div class="box">
+          <h3 class="subtitle">Mover Details</h3>
+          {{ mover_form.as_p }}
+        </div>
+      {% endif %}
 
-    {% if mover_form %}
-        <h3>Mover Details</h3>
-        {{ mover_form.as_p }}
-    {% endif %}
-
-    <button type="submit">Update Profile</button>
-</form>
-
+      <button class="button is-primary" type="submit">Update Profile</button>
+    </form>
+  </div>
+</section>
 {% endblock %}

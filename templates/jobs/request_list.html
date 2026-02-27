@@ -1,30 +1,36 @@
-<h2>My Moving Requests</h2>
+<section class="section">
+  <div class="container">
+    <h2 class="title">My Moving Requests</h2>
 
-<a href="{% url 'create_request' %}">
-    <button>Create New Request</button>
-</a>
+    <a href="{% url 'create_request' %}" class="button is-primary mb-4">
+        <span class="icon"><i class="fas fa-plus"></i></span>
+        <span>Create New Request</span>
+    </a>
 
-<hr>
-
-{% if requests %}
-    {% for req in requests %}
-        <div class="request-card">
-            <h3>{{ req.pickup_location }} → {{ req.dropoff_location }}</h3>
-            <p><strong>Date:</strong> {{ req.moving_date }}</p>
-            <p><strong>Status:</strong> {{ req.status }}</p>
-
-            <a href="{% url 'request_detail' req.id %}">
-                <button>View Details</button>
-            </a>
-
-            {% if req.status == "open" or req.status == "accepted" %}
-                <a href="{% url 'cancel_request' req.id %}">
-                    <button>Cancel</button>
-                </a>
-            {% endif %}
-        </div>
-        <hr>
-    {% endfor %}
-{% else %}
-    <p>You have not created any moving requests yet.</p>
-{% endif %}
+    {% if requests %}
+      <div class="columns is-multiline">
+        {% for req in requests %}
+          <div class="column is-half">
+            <div class="card">
+              <div class="card-content">
+                <p class="title is-5">
+                  {{ req.pickup_location }} → {{ req.dropoff_location }}
+                </p>
+                <p><strong>Date:</strong> {{ req.moving_date }}</p>
+                <p><strong>Status:</strong> {{ req.status|capfirst }}</p>
+              </div>
+              <footer class="card-footer">
+                <a class="card-footer-item" href="{% url 'request_detail' req.id %}">View Details</a>
+                {% if req.status == "open" or req.status == "accepted" %}
+                  <a class="card-footer-item has-text-danger" href="{% url 'cancel_request' req.id %}">Cancel</a>
+                {% endif %}
+              </footer>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>You have not created any moving requests yet.</p>
+    {% endif %}
+  </div>
+</section>
