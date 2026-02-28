@@ -5,60 +5,93 @@
 {% block content %}
 <section class="section">
   <div class="container">
-    <h2 class="title">My Jobs</h2>
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 class="title is-2" style="color: #2d63c3;">
+        <span class="icon"><i class="fas fa-briefcase"></i></span>
+        <span>My Jobs</span>
+      </h2>
+      <p class="subtitle" style="color: #7a8a99;">Track your assigned jobs and manage their status</p>
+    </div>
 
     {% if jobs %}
-    <table class="table is-fullwidth">
-    <thead>
-        <tr>
-            <th>ID</th>
+    <div class="box" style="overflow-x: auto;">
+      <table class="table is-fullwidth">
+        <thead>
+          <tr>
+            <th><span class="icon"><i class="fas fa-hashtag"></i></span></th>
             <th>Pickup</th>
             <th>Dropoff</th>
             <th>Date</th>
             <th>Customer</th>
             <th>Status</th>
             <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for job in jobs %}
-        <tr>
-            <td>{{ job.id }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr>
+            <td><strong>#{{ job.id }}</strong></td>
             <td>{{ job.pickup_location }}</td>
             <td>{{ job.dropoff_location }}</td>
-            <td>{{ job.moving_date }}</td>
-            <td>{{ job.customer.username }}</td>
+            <td>{{ job.moving_date|date:"M d, Y" }}</td>
+            <td><strong>{{ job.customer.username|capfirst }}</strong></td>
             <td>
-                    <span class="tag is-light">
-                        {{ job.status|capfirst }}
-                    </span>
-                </td>
-            <td>
-                {% if job.status == 'assigned' %}
-                    <a class="button is-small is-success"
-                    href="{% url 'accept_job' job.id %}">
-                    <span class="icon"><i class="fas fa-play"></i></span>
-                    <span>Start</span>
-                    </a>
-
-                {% elif job.status == 'in_progress' %}
-                    <a class="button is-small is-primary"
-                    href="{% url 'complete_job' job.id %}">
-                    <span class="icon"><i class="fas fa-check"></i></span>
-                    <span>Complete</span>
-                    </a>
-
-                {% else %}
-                    <span class="tag is-success">Completed</span>
-                {% endif %}
+              {% if job.status == 'assigned' %}
+                <span class="tag is-warning">
+                  <span class="icon"><i class="fas fa-handshake"></i></span>
+                  <span>Assigned</span>
+                </span>
+              {% elif job.status == 'in_progress' %}
+                <span class="tag is-info">
+                  <span class="icon"><i class="fas fa-cog"></i></span>
+                  <span>In Progress</span>
+                </span>
+              {% elif job.status == 'completed' %}
+                <span class="tag is-success">
+                  <span class="icon"><i class="fas fa-check-circle"></i></span>
+                  <span>Completed</span>
+                </span>
+              {% else %}
+                <span class="tag is-light">{{ job.status|capfirst }}</span>
+              {% endif %}
             </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>You have no assigned jobs yet.</p>
-{% endif %}
+            <td>
+              {% if job.status == 'assigned' %}
+                <a class="button is-small is-success" href="{% url 'accept_job' job.id %}" style="font-weight: 600;">
+                  <span class="icon"><i class="fas fa-play"></i></span>
+                  <span>Start</span>
+                </a>
+              {% elif job.status == 'in_progress' %}
+                <a class="button is-small is-primary" href="{% url 'complete_job' job.id %}" style="font-weight: 600;">
+                  <span class="icon"><i class="fas fa-check"></i></span>
+                  <span>Complete</span>
+                </a>
+              {% else %}
+                <span style="color: #7a8a99; font-size: 0.9rem;">Done</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="box" style="text-align: center; padding: 3rem;">
+      <p style="font-size: 1.5rem; color: #7a8a99; margin-bottom: 1rem;">
+        <span class="icon"><i class="fas fa-inbox"></i></span>
+      </p>
+      <p style="font-size: 1.1rem; color: #2c3e50; font-weight: 600; margin-bottom: 1rem;">
+        No assigned jobs yet
+      </p>
+      <p style="color: #7a8a99; margin-bottom: 1.5rem;">
+        Browse available jobs and place bids to get started
+      </p>
+      <a class="button is-primary" href="{% url 'available_jobs' %}" style="padding: 0.75rem 1.5rem;">
+        <span class="icon"><i class="fas fa-search"></i></span>
+        <span>Browse Jobs</span>
+      </a>
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

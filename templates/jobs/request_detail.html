@@ -1,41 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
 <section class="section">
   <div class="container">
-    <h2 class="title">Request Details</h2>
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+        <div style="margin-bottom: 2rem;">
+          <a class="button is-light" href="{% url 'my-requests' %}" style="margin-bottom: 1.5rem;">
+            <span class="icon"><i class="fas fa-arrow-left"></i></span>
+            <span>Back to My Requests</span>
+          </a>
+        </div>
 
-    <div class="box">
-      <p class="subtitle is-5">
-        {{ request_obj.pickup_location }} → {{ request_obj.dropoff_location }}
-      </p>
-      <p><strong>Date:</strong> {{ request_obj.moving_date }}</p>
-      <p><strong>Status:</strong> {{ request_obj.status|capfirst }}</p>
-    </div>
+        <!-- Request Details Box -->
+        <div class="box" style="border-top: 4px solid #2d63c3; margin-bottom: 2rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+              <p style="font-size: 0.85rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
+                PICKUP LOCATION
+              </p>
+              <h3 class="title is-4" style="margin: 0.5rem 0; color: #2c3e50;">
+                {{ request_obj.pickup_location }}
+              </h3>
+            </div>
 
-    <h3 class="title is-4">Bids</h3>
-
-    {% if bids %}
-      <div class="columns is-multiline">
-        {% for bid in bids %}
-          <div class="column is-half">
-            <div class="card">
-              <div class="card-content">
-                <p><strong>Mover:</strong> {{ bid.mover.username }}</p>
-                <p><strong>Price:</strong> ${{ bid.price }}</p>
-                <p><strong>Status:</strong> <span class="tag is-light">{{ bid.status|capfirst }}</span></p>
-              </div>
-              {% if request_obj.status == "open" and bid.status == "pending" %}
-                <footer class="card-footer">
-                  <a class="card-footer-item is-primary" href="{% url 'accept_bid' bid.id %}">
-                  <span class="icon"><i class="fas fa-check-circle"></i></span>
-                  <span>Accept</span>
-                </a>
-                </footer>
-              {% endif %}
+            <div>
+              <p style="font-size: 0.85rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
+                DROPOFF LOCATION
+              </p>
+              <h3 class="title is-4" style="margin: 0.5rem 0; color: #2c3e50;">
+                {{ request_obj.dropoff_location }}
+              </h3>
             </div>
           </div>
-        {% endfor %}
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; padding-top: 2rem; border-top: 1px solid #e0e6ed;">
+            <div>
+              <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                <span class="icon"><i class="fas fa-calendar"></i></span>
+                MOVING DATE
+              </p>
+              <p style="font-size: 1.1rem; color: #2c3e50; font-weight: 600;">
+                {{ request_obj.moving_date|date:"M d, Y" }}
+              </p>
+            </div>
+
+            <div>
+              <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                <span class="icon"><i class="fas fa-circle"></i></span>
+                STATUS
+              </p>
+              <p>
+                {% if request_obj.status == "open" %}
+                  <span class="tag is-success" style="font-size: 0.95rem;">
+                    <span class="icon"><i class="fas fa-circle"></i></span>
+                    <span>Open</span>
+                  </span>
+                {% elif request_obj.status == "closed" %}
+                  <span class="tag is-danger" style="font-size: 0.95rem;">
+                    <span class="icon"><i class="fas fa-times-circle"></i></span>
+                    <span>Closed</span>
+                  </span>
+                {% else %}
+                  <span class="tag is-light" style="font-size: 0.95rem;">{{ request_obj.status|capfirst }}</span>
+                {% endif %}
+              </p>
+            </div>
+
+            <div>
+              <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                <span class="icon"><i class="fas fa-list"></i></span>
+                NUM BIDS
+              </p>
+              <p style="font-size: 1.1rem; color: #2d63c3; font-weight: 600;">
+                {{ bids|length }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bids Section -->
+        <div class="box" style="border-top: 4px solid #ff9f1c;">
+          <h3 class="title is-4" style="color: #2c3e50; margin-bottom: 1.5rem;">
+            <span class="icon"><i class="fas fa-tag"></i></span>
+            <span>Bids Received ({{ bids|length }})</span>
+          </h3>
+
+          {% if bids %}
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+              {% for bid in bids %}
+                <div style="border: 2px solid #e0e6ed; border-radius: 8px; padding: 1.5rem; transition: all 0.3s ease;">
+                  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1.5rem; align-items: center;">
+                    <div>
+                      <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.3rem; font-weight: 600;">
+                        <span class="icon"><i class="fas fa-user"></i></span>
+                        MOVER
+                      </p>
+                      <p style="font-size: 1.1rem; color: #2c3e50; font-weight: 600;">
+                        {{ bid.mover.username|capfirst }}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.3rem; font-weight: 600;">
+                        <span class="icon"><i class="fas fa-dollar-sign"></i></span>
+                        PRICE
+                      </p>
+                      <p style="font-size: 1.2rem; color: #2d63c3; font-weight: 700;">
+                        ${{ bid.price }}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.3rem; font-weight: 600;">
+                        <span class="icon"><i class="fas fa-circle"></i></span>
+                        STATUS
+                      </p>
+                      <p>
+                        {% if bid.status == "accepted" %}
+                          <span class="tag is-success">
+                            <span class="icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Accepted</span>
+                          </span>
+                        {% elif bid.status == "rejected" %}
+                          <span class="tag is-danger">
+                            <span class="icon"><i class="fas fa-times-circle"></i></span>
+                            <span>Rejected</span>
+                          </span>
+                        {% else %}
+                          <span class="tag is-info">{{ bid.status|capfirst }}</span>
+                        {% endif %}
+                      </p>
+                    </div>
+
+                    {% if request_obj.status == "open" and bid.status == "pending" %}
+                      <div>
+                        <a class="button is-success" href="{% url 'accept_bid' bid.id %}" style="margin-bottom: 0.5rem; width: 100%;">
+                          <span class="icon"><i class="fas fa-check-circle"></i></span>
+                          <span>Accept</span>
+                        </a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="text-align: center; padding: 2rem;">
+              <p style="color: #7a8a99; font-size: 1rem;">
+                <span class="icon" style="font-size: 1.5rem;"><i class="fas fa-inbox"></i></span>
+              </p>
+              <p style="color: #2c3e50; font-weight: 600;">No bids yet</p>
+              <p style="color: #7a8a99; font-size: 0.95rem;">
+                Bids will appear here as movers respond to your request
+              </p>
+            </div>
+          {% endif %}
+        </div>
       </div>
-    {% else %}
-      <p>No bids yet.</p>
-    {% endif %}
+    </div>
   </div>
 </section>
+{% endblock %}

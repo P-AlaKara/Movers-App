@@ -1,22 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
 <section class="section">
   <div class="container">
-    <h2 class="title">Available Jobs</h2>
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 class="title is-2" style="color: #2d63c3;">
+        <span class="icon"><i class="fas fa-briefcase"></i></span>
+        <span>Available Jobs</span>
+      </h2>
+      <p class="subtitle" style="color: #7a8a99;">Find and bid on moving jobs in your area</p>
+    </div>
 
     {% if jobs %}
       <div class="columns is-multiline">
         {% for job in jobs %}
-          <div class="column is-half">
-            <div class="card">
-              <div class="card-content">
-                <p class="title is-5">{{ job.pickup_location }} → {{ job.dropoff_location }}</p>
-                <p><strong>Date:</strong> {{ job.moving_date }}</p>
-                <p><strong>Status:</strong> {{ job.status|capfirst }}</p>
+          <div class="column is-one-third">
+            <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+              <div class="card-content" style="flex: 1;">
+                <div style="margin-bottom: 1.5rem;">
+                  <p style="font-size: 0.85rem; color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
+                    <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
+                    MOVE ROUTE
+                  </p>
+                  <h3 class="title is-5" style="margin: 0.5rem 0;">
+                    <span style="color: #2c3e50;">{{ job.pickup_location }}</span>
+                    <span style="color: #7a8a99;"> → </span>
+                    <span style="color: #2c3e50;">{{ job.dropoff_location }}</span>
+                  </h3>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                  <div>
+                    <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.3rem;">
+                      <strong>Date</strong>
+                    </p>
+                    <p style="font-size: 0.95rem; color: #2c3e50; font-weight: 600;">
+                      <span class="icon"><i class="fas fa-calendar"></i></span>
+                      {{ job.moving_date|date:"M d" }}
+                    </p>
+                  </div>
+                  <div>
+                    <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.3rem;">
+                      <strong>Status</strong>
+                    </p>
+                    <p>
+                      {% if job.status == "open" %}
+                        <span class="tag is-success">
+                          <span class="icon"><i class="fas fa-circle"></i></span>
+                          <span>Open</span>
+                        </span>
+                      {% elif job.status == "closed" %}
+                        <span class="tag is-danger">
+                          <span class="icon"><i class="fas fa-times-circle"></i></span>
+                          <span>Closed</span>
+                        </span>
+                      {% else %}
+                        <span class="tag is-light">{{ job.status|capfirst }}</span>
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+
+                {% if job.description %}
+                  <p style="color: #7a8a99; font-size: 0.9rem; line-height: 1.5;">
+                    {{ job.description|truncatewords:15 }}
+                  </p>
+                {% endif %}
               </div>
+
               <footer class="card-footer">
                 {% if job.id in existing_bids %}
-                  <span class="tag is-info card-footer-item">Bid Placed</span>
+                  <div class="card-footer-item" style="flex: 1; padding: 1rem; text-align: center;">
+                    <span class="tag is-info">
+                      <span class="icon"><i class="fas fa-check"></i></span>
+                      <span>Bid Placed</span>
+                    </span>
+                  </div>
                 {% else %}
-                  <a class="card-footer-item is-primary" href="{% url 'place_bid' job.id %}">Place Bid</a>
+                  <a class="card-footer-item is-primary" href="{% url 'place_bid' job.id %}" style="background-color: #2d63c3; color: white; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                    <span class="icon"><i class="fas fa-plus"></i></span>
+                    <span>Place Bid</span>
+                  </a>
                 {% endif %}
               </footer>
             </div>
@@ -24,7 +88,18 @@
         {% endfor %}
       </div>
     {% else %}
-      <p>No jobs available in your service area right now.</p>
+      <div class="box" style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.2rem; color: #7a8a99; margin-bottom: 1rem;">
+          <span class="icon" style="font-size: 2rem;"><i class="fas fa-inbox"></i></span>
+        </p>
+        <p style="font-size: 1.1rem; color: #2c3e50; font-weight: 600; margin-bottom: 0.5rem;">
+          No jobs available right now
+        </p>
+        <p style="color: #7a8a99;">
+          Check back soon for new moving opportunities in your service area
+        </p>
+      </div>
     {% endif %}
   </div>
 </section>
+{% endblock %}

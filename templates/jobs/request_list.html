@@ -1,28 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
 <section class="section">
   <div class="container">
-    <h2 class="title">My Moving Requests</h2>
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 class="title is-2" style="color: #2d63c3;">
+        <span class="icon"><i class="fas fa-list"></i></span>
+        <span>My Moving Requests</span>
+      </h2>
+      <p class="subtitle" style="color: #7a8a99;">Create, manage, and track your moving requests</p>
+    </div>
 
-    <a href="{% url 'create_request' %}" class="button is-primary mb-4">
+    <!-- Create Button -->
+    <div style="margin-bottom: 2rem;">
+      <a href="{% url 'create_request' %}" class="button is-primary" style="padding: 0.85rem 2rem; font-size: 1rem;">
         <span class="icon"><i class="fas fa-plus"></i></span>
         <span>Create New Request</span>
-    </a>
+      </a>
+    </div>
 
     {% if requests %}
       <div class="columns is-multiline">
         {% for req in requests %}
-          <div class="column is-half">
-            <div class="card">
-              <div class="card-content">
-                <p class="title is-5">
-                  {{ req.pickup_location }} → {{ req.dropoff_location }}
-                </p>
-                <p><strong>Date:</strong> {{ req.moving_date }}</p>
-                <p><strong>Status:</strong> {{ req.status|capfirst }}</p>
+          <div class="column is-one-third">
+            <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+              <div class="card-content" style="flex: 1;">
+                <div style="margin-bottom: 1.5rem;">
+                  <p style="font-size: 0.85rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                    <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
+                    REQUEST #{{ req.id }}
+                  </p>
+                  <h3 class="title is-5" style="margin: 0.5rem 0;">
+                    <span style="color: #2c3e50;">{{ req.pickup_location }}</span><br>
+                    <span style="color: #7a8a99; font-size: 0.9rem;">→ {{ req.dropoff_location }}</span>
+                  </h3>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e6ed;">
+                  <div>
+                    <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.3rem; font-weight: 600;">
+                      <span class="icon"><i class="fas fa-calendar"></i></span>
+                      DATE
+                    </p>
+                    <p style="font-size: 0.95rem; color: #2c3e50; font-weight: 600;">
+                      {{ req.moving_date|date:"M d, Y" }}
+                    </p>
+                  </div>
+                  <div>
+                    <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.3rem; font-weight: 600;">
+                      <span class="icon"><i class="fas fa-tag"></i></span>
+                      BIDS
+                    </p>
+                    <p style="font-size: 1rem; color: #2d63c3; font-weight: 700;">
+                      {{ req.bid_count|default:0 }}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p style="font-size: 0.8rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                    <span class="icon"><i class="fas fa-circle"></i></span>
+                    STATUS
+                  </p>
+                  <p>
+                    {% if req.status == 'open' %}
+                      <span class="tag is-success">
+                        <span class="icon"><i class="fas fa-hourglass-start"></i></span>
+                        <span>Open</span>
+                      </span>
+                    {% elif req.status == 'accepted' %}
+                      <span class="tag is-info">
+                        <span class="icon"><i class="fas fa-handshake"></i></span>
+                        <span>Accepted</span>
+                      </span>
+                    {% elif req.status == 'completed' %}
+                      <span class="tag is-success">
+                        <span class="icon"><i class="fas fa-check-circle"></i></span>
+                        <span>Completed</span>
+                      </span>
+                    {% elif req.status == 'cancelled' %}
+                      <span class="tag is-danger">
+                        <span class="icon"><i class="fas fa-times-circle"></i></span>
+                        <span>Cancelled</span>
+                      </span>
+                    {% else %}
+                      <span class="tag is-light">{{ req.status|capfirst }}</span>
+                    {% endif %}
+                  </p>
+                </div>
               </div>
+
               <footer class="card-footer">
-                <a class="card-footer-item" href="{% url 'request_detail' req.id %}">View Details</a>
+                <a class="card-footer-item is-primary" href="{% url 'request_detail' req.id %}" style="background-color: #2d63c3; color: white; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                  <span class="icon"><i class="fas fa-eye"></i></span>
+                  <span>View Details</span>
+                </a>
                 {% if req.status == "open" or req.status == "accepted" %}
-                  <a class="card-footer-item has-text-danger" href="{% url 'cancel_request' req.id %}">Cancel</a>
+                  <a class="card-footer-item has-text-danger" href="{% url 'cancel_request' req.id %}" style="color: #f56565; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                    <span class="icon"><i class="fas fa-times"></i></span>
+                    <span>Cancel</span>
+                  </a>
                 {% endif %}
               </footer>
             </div>
@@ -30,7 +107,22 @@
         {% endfor %}
       </div>
     {% else %}
-      <p>You have not created any moving requests yet.</p>
+      <div class="box" style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.5rem; color: #7a8a99; margin-bottom: 1rem;">
+          <span class="icon"><i class="fas fa-inbox"></i></span>
+        </p>
+        <p style="font-size: 1.1rem; color: #2c3e50; font-weight: 600; margin-bottom: 1rem;">
+          You haven't created any moving requests yet
+        </p>
+        <p style="color: #7a8a99; margin-bottom: 1.5rem;">
+          Start by creating a new moving request and get bids from local movers
+        </p>
+        <a class="button is-primary" href="{% url 'create_request' %}" style="padding: 0.75rem 1.5rem;">
+          <span class="icon"><i class="fas fa-plus"></i></span>
+          <span>Create Request</span>
+        </a>
+      </div>
     {% endif %}
   </div>
 </section>
+{% endblock %}

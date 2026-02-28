@@ -1,35 +1,73 @@
 {% extends "base.html" %}
-{% block title %}Notifications{% endblock %}
+{% block title %}Notifications - Songa{% endblock %}
 
 {% block content %}
-
-<h2 class="title">Notifications</h2>
-
-{% if notifications %}
-  {% for notification in notifications %}
-    <div class="box {% if not notification.is_read %}has-background-light{% endif %}">
-      <p>{{ notification.message }}</p>
-      <small>{{ notification.created_at }}</small>
-
-      <div class="mt-2">
-        {% if notification.link %}
-          <a class="button is-small is-link"
-             href="{{ notification.link }}">
-             View
-          </a>
-        {% endif %}
-
-        {% if not notification.is_read %}
-          <a class="button is-small is-success"
-             href="{% url 'mark_notification_read' notification.id %}">
-             Mark as Read
-          </a>
-        {% endif %}
-      </div>
+<section class="section">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 class="title is-2" style="color: #2d63c3;">
+        <span class="icon"><i class="fas fa-bell"></i></span>
+        <span>Notifications</span>
+      </h2>
+      <p class="subtitle" style="color: #7a8a99;">Stay updated with your moving activity</p>
     </div>
-  {% endfor %}
-{% else %}
-  <p>No notifications yet.</p>
-{% endif %}
 
+    {% if notifications %}
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          {% for notification in notifications %}
+            <div class="box" style="border-left: 4px solid {% if not notification.is_read %}#2d63c3{% else %}#48bb78{% endif %}; margin-bottom: 1.5rem; {% if not notification.is_read %}background: linear-gradient(90deg, rgba(45,99,195,0.05), transparent){% endif %}">
+              <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    {% if not notification.is_read %}
+                      <span style="width: 10px; height: 10px; background-color: #2d63c3; border-radius: 50%; display: block;"></span>
+                    {% else %}
+                      <span class="icon" style="color: #48bb78;"><i class="fas fa-check-circle"></i></span>
+                    {% endif %}
+                    <p style="font-size: 0.9rem; color: #7a8a99; margin: 0; font-weight: 600;">
+                      {{ notification.created_at|date:"M d, Y g:i A" }}
+                    </p>
+                  </div>
+
+                  <p style="font-size: 1rem; color: #2c3e50; line-height: 1.6; margin: 0.75rem 0;">
+                    {{ notification.message }}
+                  </p>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                  {% if notification.link %}
+                    <a class="button is-small is-primary" href="{{ notification.link }}" style="font-weight: 600;">
+                      <span class="icon"><i class="fas fa-external-link-alt"></i></span>
+                      <span>View</span>
+                    </a>
+                  {% endif %}
+
+                  {% if not notification.is_read %}
+                    <a class="button is-small is-success" href="{% url 'mark_notification_read' notification.id %}" style="font-weight: 600;">
+                      <span class="icon"><i class="fas fa-check"></i></span>
+                      <span>Read</span>
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <div class="box" style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.5rem; color: #7a8a99; margin-bottom: 1rem;">
+          <span class="icon"><i class="fas fa-envelope-open"></i></span>
+        </p>
+        <p style="font-size: 1.1rem; color: #2c3e50; font-weight: 600; margin-bottom: 0.5rem;">
+          No notifications yet
+        </p>
+        <p style="color: #7a8a99;">
+          You'll be notified about bids, messages, and updates on your moving requests
+        </p>
+      </div>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

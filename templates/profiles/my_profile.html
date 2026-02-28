@@ -3,30 +3,157 @@
 {% block content %}
 <section class="section">
   <div class="container">
-    <h2 class="title">My Profile</h2>
-
-    <div class="box">
-      <p><strong>Username:</strong> {{ request.user.username }}</p>
-      <p><strong>Email:</strong> {{ request.user.email }}</p>
-      <p><strong>Role:</strong> {{ profile.role|capfirst }}</p>
-    </div>
-
-    <form method="POST">
-      {% csrf_token %}
-      <div class="box">
-        <h3 class="subtitle">Basic Info</h3>
-        {{ profile_form.as_p }}
-      </div>
-
-      {% if mover_form %}
-        <div class="box">
-          <h3 class="subtitle">Mover Details</h3>
-          {{ mover_form.as_p }}
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+        <div style="text-align: center; margin-bottom: 3rem;">
+          <h2 class="title is-2" style="color: #2d63c3;">
+            <span class="icon"><i class="fas fa-user-circle"></i></span>
+            <span>My Profile</span>
+          </h2>
+          <p class="subtitle" style="color: #7a8a99;">Manage your account information and preferences</p>
         </div>
-      {% endif %}
 
-      <button class="button is-primary" type="submit">Update Profile</button>
-    </form>
+        <!-- User Info Box -->
+        <div class="box" style="border-top: 4px solid #2d63c3; margin-bottom: 2rem;">
+          <h3 class="title is-5" style="color: #2c3e50; margin-bottom: 1.5rem;">
+            <span class="icon"><i class="fas fa-user"></i></span>
+            <span>Account Information</span>
+          </h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div>
+              <p style="font-size: 0.85rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                USERNAME
+              </p>
+              <p style="font-size: 1rem; color: #2c3e50; font-weight: 600;">
+                {{ request.user.username }}
+              </p>
+            </div>
+
+            <div>
+              <p style="font-size: 0.85rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                EMAIL
+              </p>
+              <p style="font-size: 1rem; color: #2c3e50; font-weight: 600;">
+                {{ request.user.email }}
+              </p>
+            </div>
+
+            <div>
+              <p style="font-size: 0.85rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                <span class="icon"><i class="fas fa-briefcase"></i></span>
+                ROLE
+              </p>
+              <p>
+                <span class="tag is-primary">{{ profile.role|capfirst }}</span>
+              </p>
+            </div>
+
+            <div>
+              <p style="font-size: 0.85rem; color: #7a8a99; margin-bottom: 0.5rem; font-weight: 600;">
+                <span class="icon"><i class="fas fa-calendar"></i></span>
+                JOINED
+              </p>
+              <p style="font-size: 1rem; color: #2c3e50; font-weight: 600;">
+                {{ request.user.date_joined|date:"M d, Y" }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Form -->
+        <form method="POST">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div style="background-color: rgba(72, 187, 120, 0.1); border-left: 4px solid #48bb78; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+              <p style="color: #48bb78; font-weight: 600;">{{ form.non_field_errors }}</p>
+            </div>
+          {% endif %}
+
+          <!-- Basic Info Section -->
+          <div class="box" style="border-top: 4px solid #ff9f1c; margin-bottom: 2rem;">
+            <h3 class="title is-5" style="color: #2c3e50; margin-bottom: 1.5rem;">
+              <span class="icon"><i class="fas fa-edit"></i></span>
+              <span>Basic Information</span>
+            </h3>
+
+            <div style="display: contents;">
+              {% for field in profile_form %}
+                <div class="field">
+                  <label class="label" style="font-weight: 600; color: #2c3e50;">
+                    {{ field.label }}
+                    {% if field.field.required %}<span style="color: #f56565;">*</span>{% endif %}
+                  </label>
+                  <div class="control">
+                    {{ field }}
+                  </div>
+                  {% if field.help_text %}
+                    <p style="font-size: 0.85rem; color: #7a8a99; margin-top: 0.5rem;">
+                      {{ field.help_text|safe }}
+                    </p>
+                  {% endif %}
+                  {% if field.errors %}
+                    <div style="color: #f56565; font-size: 0.875rem; margin-top: 0.5rem;">
+                      {% for error in field.errors %}<p>✗ {{ error }}</p>{% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Mover Details Section (if applicable) -->
+          {% if mover_form %}
+            <div class="box" style="border-top: 4px solid #2d63c3; margin-bottom: 2rem;">
+              <h3 class="title is-5" style="color: #2c3e50; margin-bottom: 1.5rem;">
+                <span class="icon"><i class="fas fa-truck"></i></span>
+                <span>Mover Details</span>
+              </h3>
+
+              <div style="display: contents;">
+                {% for field in mover_form %}
+                  <div class="field">
+                    <label class="label" style="font-weight: 600; color: #2c3e50;">
+                      {{ field.label }}
+                      {% if field.field.required %}<span style="color: #f56565;">*</span>{% endif %}
+                    </label>
+                    <div class="control">
+                      {{ field }}
+                    </div>
+                    {% if field.help_text %}
+                      <p style="font-size: 0.85rem; color: #7a8a99; margin-top: 0.5rem;">
+                        {{ field.help_text|safe }}
+                      </p>
+                    {% endif %}
+                    {% if field.errors %}
+                      <div style="color: #f56565; font-size: 0.875rem; margin-top: 0.5rem;">
+                        {% for error in field.errors %}<p>✗ {{ error }}</p>{% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button class="button is-primary" type="submit" style="padding: 0.85rem 2rem; font-size: 1rem;">
+                <span class="icon"><i class="fas fa-save"></i></span>
+                <span>Update Profile</span>
+              </button>
+            </div>
+            <div class="control">
+              <a class="button is-light" href="{% url 'dashboard' %}" style="padding: 0.85rem 2rem; font-size: 1rem;">
+                <span class="icon"><i class="fas fa-times"></i></span>
+                <span>Cancel</span>
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}

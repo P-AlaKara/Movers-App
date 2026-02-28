@@ -1,2 +1,23 @@
-<h2>Mover Dashboard</h2>
-<p>You can browse and accept moving jobs.</p>
+{% extends "base.html" %}
+{% block title %}Mover Dashboard{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <h2 class="title is-2" style="color: #2d63c3;">
+        <span class="icon"><i class="fas fa-truck"></i></span>
+        <span>Mover Dashboard</span>
+      </h2>
+      <p class="subtitle" style="color: #7a8a99;">You can browse and accept moving jobs</p>
+    </div>
+
+    <div class="box" style="text-align: center; padding: 2rem;">
+      <a class="button is-primary" href="{% url 'available_jobs' %}" style="padding: 0.85rem 2rem; font-size: 1rem;">
+        <span class="icon"><i class="fas fa-search"></i></span>
+        <span>Browse Available Jobs</span>
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
