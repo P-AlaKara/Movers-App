@@ -4,6 +4,7 @@ from .forms import MovingRequestForm, BidForm
 from .models import MovingRequest, Bid
 from profiles.models import MoverProfile, Profile
 from django.contrib import messages
+from notifications.utils import create_notification
 
 # Create your views here.
 @login_required
@@ -88,6 +89,13 @@ def place_bid(request, request_id):
             bid.moving_request = moving_request
             bid.mover = request.user
             bid.save()
+            
+            create_notification(
+                user=moving_request.customer,
+                message=f"New bid placed on your request #{moving_request.id}.",
+                link=f"/jobs/request_detail/{moving_request.id}"
+            )
+
             return redirect('available_jobs')
     else:
         form = BidForm()
@@ -146,6 +154,13 @@ def accept_bid(request, bid_id):
     bid.status = 'accepted'
     bid.save()
 
+    #create notification
+    create_notification(
+        user=bid.mover,
+        message=f"Your bid for request #{bid.moving_request.id} was accepted!",
+        link=f"/dashboard/"
+    )
+
     # Reject all others
     Bid.objects.filter(
         moving_request=bid.moving_request
@@ -170,6 +185,12 @@ def start_job(request, request_id):
         job.status = 'in_progress'
         job.save()
 
+    create_notification(
+        user=job.customer,
+        message=f"Your move #{job.id} has started.",
+        link=f"/requests/{job.id}/"
+    )
+
     return redirect('my_jobs')
 
 @login_required
@@ -191,6 +212,12 @@ def complete_job(request, request_id):
         job.status = 'completed'
         job.save()
 
+    create_notification(
+        user=job.customer,
+        message=f"Your move #{job.id} has been completed.",
+        link=f"/requests/{job.id}/"
+    )
+
     return redirect('my_jobs')
 
 @login_required
@@ -204,6 +231,15 @@ def cancel_request(request, request_id):
     if moving_request.status in ['open', 'accepted']:
         moving_request.status = 'cancelled'
         moving_request.save()
+
+    #create notification for accepted mover
+    accepted_bid = moving_request.bids.filter(status='accepted').first()
+    if accepted_bid:
+        create_notification(
+            user=accepted_bid.mover,
+            message=f"The moving request #{moving_request.id} was cancelled.",
+            link=f"/dashboard/"
+        )
 
     return redirect('dashboard')
 

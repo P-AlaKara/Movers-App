@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'profiles.apps.ProfilesConfig',
     'jobs',
     'dashboard',
-    'core',
+    'notifications',
 ]
 
 MIDDLEWARE = [

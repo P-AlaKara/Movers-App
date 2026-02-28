@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+
+<h2 class="title">Notifications</h2>
+
+{% if notifications %}
+  {% for notification in notifications %}
+    <div class="box {% if not notification.is_read %}has-background-light{% endif %}">
+      <p>{{ notification.message }}</p>
+      <small>{{ notification.created_at }}</small>
+
+      <div class="mt-2">
+        {% if notification.link %}
+          <a class="button is-small is-link"
+             href="{{ notification.link }}">
+             View
+          </a>
+        {% endif %}
+
+        {% if not notification.is_read %}
+          <a class="button is-small is-success"
+             href="{% url 'mark_notification_read' notification.id %}">
+             Mark as Read
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No notifications yet.</p>
+{% endif %}
+
+{% endblock %}
