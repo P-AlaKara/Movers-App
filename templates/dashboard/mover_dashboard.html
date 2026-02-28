@@ -2,226 +2,152 @@
 {% block title %}Mover Dashboard{% endblock %}
 
 {% block content %}
-<section class="section">
-  <div class="container">
-    <div style="text-align: center; margin-bottom: 3rem;">
-      <h2 class="title is-2" style="color: #2d63c3;">
-        <span class="icon"><i class="fas fa-truck"></i></span>
-        <span>Mover Dashboard</span>
-      </h2>
-      <p class="subtitle" style="color: #7a8a99;">Track your jobs and manage your bids</p>
-    </div>
 
-    <!-- Browse Jobs Button -->
-    <div style="margin-bottom: 2.5rem;">
-      <a class="button is-primary" href="{% url 'available_jobs' %}" style="padding: 0.85rem 2rem; font-size: 1rem;">
-        <span class="icon"><i class="fas fa-search"></i></span>
-        <span>Browse Available Jobs</span>
-      </a>
-    </div>
+<h2 class="title mb-5">Mover Dashboard</h2>
 
-    <!-- ================= JOB STATS ================= -->
-    <div style="margin-bottom: 3rem;">
-      <h3 class="title is-4" style="color: #2c3e50; margin-bottom: 1.5rem;">
-        <span class="icon"><i class="fas fa-clipboard-list"></i></span>
-        <span>My Jobs</span>
-      </h3>
-      
-      <div class="columns is-multiline">
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #2d63c3; background: linear-gradient(135deg, rgba(45, 99, 195, 0.05), rgba(45, 99, 195, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-list"></i> Total
-            </p>
-            <h3 class="title is-3" style="color: #2d63c3; margin: 0;">{{ stats.job_stats.total }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #ffa500; background: linear-gradient(135deg, rgba(255, 159, 28, 0.05), rgba(255, 159, 28, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-handshake"></i> Assigned
-            </p>
-            <h3 class="title is-3" style="color: #ffa500; margin: 0;">{{ stats.job_stats.accepted }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #5a85d3; background: linear-gradient(135deg, rgba(90, 133, 211, 0.05), rgba(90, 133, 211, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-cog"></i> In Progress
-            </p>
-            <h3 class="title is-3" style="color: #5a85d3; margin: 0;">{{ stats.job_stats.in_progress }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #48bb78; background: linear-gradient(135deg, rgba(72, 187, 120, 0.05), rgba(72, 187, 120, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-check-circle"></i> Completed
-            </p>
-            <h3 class="title is-3" style="color: #48bb78; margin: 0;">{{ stats.job_stats.completed }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #f56565; background: linear-gradient(135deg, rgba(245, 101, 101, 0.05), rgba(245, 101, 101, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-times-circle"></i> Cancelled
-            </p>
-            <h3 class="title is-3" style="color: #f56565; margin: 0;">{{ stats.job_stats.cancelled }}</h3>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="mb-5">
+  <a class="button is-primary"
+     href="{% url 'available_jobs' %}">
+     Browse Available Jobs
+  </a>
+</div>
 
-    <!-- Filter Buttons -->
-    <div class="buttons mb-4" style="flex-wrap: wrap; margin-bottom: 2rem;">
-      <a class="button {% if request.GET.status == '' or not request.GET.status %}is-primary{% else %}is-light{% endif %}" href="{% url 'dashboard' %}" style="font-weight: 600;">
-        All Jobs
-      </a>
-      <a class="button {% if request.GET.status == 'accepted' %}is-warning{% else %}is-light{% endif %}" href="?status=accepted" style="font-weight: 600;">
-        <span class="icon"><i class="fas fa-handshake"></i></span>
-        <span>Assigned</span>
-      </a>
-      <a class="button {% if request.GET.status == 'in_progress' %}is-info{% else %}is-light{% endif %}" href="?status=in_progress" style="font-weight: 600;">
-        <span class="icon"><i class="fas fa-cog"></i></span>
-        <span>In Progress</span>
-      </a>
-      <a class="button {% if request.GET.status == 'completed' %}is-success{% else %}is-light{% endif %}" href="?status=completed" style="font-weight: 600;">
-        <span class="icon"><i class="fas fa-check-circle"></i></span>
-        <span>Completed</span>
-      </a>
-      <a class="button {% if request.GET.status == 'cancelled' %}is-danger{% else %}is-light{% endif %}" href="?status=cancelled" style="font-weight: 600;">
-        <span class="icon"><i class="fas fa-times-circle"></i></span>
-        <span>Cancelled</span>
-      </a>
-    </div>
+<!-- ================= JOB STATS ================= -->
+<h4 class="subtitle">My Jobs</h4>
 
-    <!-- Job Table -->
-    {% if jobs %}
-    <div class="box" style="overflow-x: auto; margin-bottom: 3rem;">
-      <table class="table is-fullwidth">
-        <thead>
-          <tr>
-            <th><span class="icon"><i class="fas fa-hashtag"></i></span></th>
-            <th>Pickup</th>
-            <th>Dropoff</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for job in jobs %}
-          <tr>
-            <td><strong>#{{ job.id }}</strong></td>
-            <td>{{ job.pickup_location }}</td>
-            <td>{{ job.dropoff_location }}</td>
-            <td>{{ job.moving_date|date:"M d, Y" }}</td>
-            <td>
-              {% if job.status == 'accepted' %}
-                <span class="tag is-warning">
-                  <span class="icon"><i class="fas fa-handshake"></i></span>
-                  <span>Assigned</span>
-                </span>
-              {% elif job.status == 'in_progress' %}
-                <span class="tag is-info">
-                  <span class="icon"><i class="fas fa-cog"></i></span>
-                  <span>In Progress</span>
-                </span>
-              {% elif job.status == 'completed' %}
-                <span class="tag is-success">
-                  <span class="icon"><i class="fas fa-check-circle"></i></span>
-                  <span>Completed</span>
-                </span>
-              {% elif job.status == 'cancelled' %}
-                <span class="tag is-danger">
-                  <span class="icon"><i class="fas fa-times-circle"></i></span>
-                  <span>Cancelled</span>
-                </span>
-              {% else %}
-                <span class="tag is-light">{{ job.status|capfirst }}</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if job.status == 'accepted' %}
-                <a class="button is-small is-success" href="{% url 'start_job' job.id %}" style="font-weight: 600;">
-                  <span class="icon"><i class="fas fa-play"></i></span>
-                  <span>Start</span>
-                </a>
-              {% elif job.status == 'in_progress' %}
-                <a class="button is-small is-primary" href="{% url 'complete_job' job.id %}" style="font-weight: 600;">
-                  <span class="icon"><i class="fas fa-check"></i></span>
-                  <span>Complete</span>
-                </a>
-              {% else %}
-                <span style="color: #7a8a99; font-size: 0.9rem;">No actions</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="box" style="text-align: center; padding: 2.5rem; margin-bottom: 3rem;">
-      <p style="color: #7a8a99; font-size: 1rem; margin-bottom: 1rem;">
-        <span class="icon" style="font-size: 1.5rem;"><i class="fas fa-inbox"></i></span>
-      </p>
-      <p style="color: #2c3e50; font-weight: 600;">No jobs found</p>
-      <p style="color: #7a8a99; font-size: 0.95rem;">Browse available jobs to start bidding</p>
-    </div>
-    {% endif %}
-
-    <hr style="background-color: #e0e6ed; height: 2px; border: none; margin: 3rem 0;">
-
-    <!-- ================= BID STATS ================= -->
-    <div style="margin-bottom: 3rem;">
-      <h3 class="title is-4" style="color: #2c3e50; margin-bottom: 1.5rem;">
-        <span class="icon"><i class="fas fa-tag"></i></span>
-        <span>My Bids</span>
-      </h3>
-      
-      <div class="columns is-multiline">
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #2d63c3; background: linear-gradient(135deg, rgba(45, 99, 195, 0.05), rgba(45, 99, 195, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-list"></i> Total
-            </p>
-            <h3 class="title is-3" style="color: #2d63c3; margin: 0;">{{ stats.bid_stats.total }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #ffa500; background: linear-gradient(135deg, rgba(255, 159, 28, 0.05), rgba(255, 159, 28, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-hourglass-start"></i> Pending
-            </p>
-            <h3 class="title is-3" style="color: #ffa500; margin: 0;">{{ stats.bid_stats.pending }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #5a85d3; background: linear-gradient(135deg, rgba(90, 133, 211, 0.05), rgba(90, 133, 211, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-check-circle"></i> Accepted
-            </p>
-            <h3 class="title is-3" style="color: #5a85d3; margin: 0;">{{ stats.bid_stats.accepted }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #f56565; background: linear-gradient(135deg, rgba(245, 101, 101, 0.05), rgba(245, 101, 101, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-times-circle"></i> Rejected
-            </p>
-            <h3 class="title is-3" style="color: #f56565; margin: 0;">{{ stats.bid_stats.rejected }}</h3>
-          </div>
-        </div>
-        <div class="column is-one-fifth">
-          <div class="box" style="text-align: center; border-top: 4px solid #ccc; background: linear-gradient(135deg, rgba(200, 200, 200, 0.05), rgba(200, 200, 200, 0.1));">
-            <p style="color: #7a8a99; font-weight: 600; margin-bottom: 0.5rem;">
-              <i class="fas fa-ban"></i> Cancelled
-            </p>
-            <h3 class="title is-3" style="color: #999; margin: 0;">{{ stats.bid_stats.cancelled }}</h3>
-          </div>
-        </div>
-      </div>
+<div class="columns">
+  <div class="column">
+    <div class="box has-background-light">
+      <p>Total</p>
+      <h3 class="title">{{ stats.job_stats.total }}</h3>
     </div>
   </div>
-</section>
+  <div class="column">
+    <div class="box has-background-warning-light">
+      <p>Accepted</p>
+      <h3 class="title">{{ stats.job_stats.accepted }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-info-light">
+      <p>In Progress</p>
+      <h3 class="title">{{ stats.job_stats.in_progress }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-success-light">
+      <p>Completed</p>
+      <h3 class="title">{{ stats.job_stats.completed }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-danger-light">
+      <p>Cancelled</p>
+      <h3 class="title">{{ stats.job_stats.cancelled }}</h3>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FILTER ================= -->
+<div class="buttons mb-4">
+  <a class="button" href="{% url 'dashboard' %}">All</a>
+  <a class="button is-warning" href="?status=accepted">Accepted</a>
+  <a class="button is-info" href="?status=in_progress">In Progress</a>
+  <a class="button is-success" href="?status=completed">Completed</a>
+  <a class="button is-danger" href="?status=cancelled">Cancelled</a>
+</div>
+
+<!-- ================= JOB TABLE ================= -->
+{% if jobs %}
+<table class="table is-fullwidth is-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Pickup</th>
+      <th>Dropoff</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>#{{ job.id }}</td>
+      <td>{{ job.pickup_location }}</td>
+      <td>{{ job.dropoff_location }}</td>
+      <td>{{ job.moving_date }}</td>
+      <td>
+        <span class="tag
+          {% if job.status == 'accepted' %}is-warning
+          {% elif job.status == 'in_progress' %}is-info
+          {% elif job.status == 'completed' %}is-success
+          {% elif job.status == 'cancelled' %}is-danger
+          {% endif %}">
+          {{ job.status|capfirst }}
+        </span>
+      </td>
+      <td>
+        {% if job.status == 'accepted' %}
+          <a class="button is-small is-success"
+             href="{% url 'start_job' job.id %}">
+             Start
+          </a>
+
+        {% elif job.status == 'in_progress' %}
+          <a class="button is-small is-primary"
+             href="{% url 'complete_job' job.id %}">
+             Complete
+          </a>
+
+        {% else %}
+          <span class="tag is-light">No actions</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No jobs found.</p>
+{% endif %}
+
+<hr class="my-6">
+
+<!-- ================= BID STATS ================= -->
+<h4 class="subtitle">My Bids</h4>
+
+<div class="columns">
+  <div class="column">
+    <div class="box has-background-light">
+      <p>Total Bids</p>
+      <h3 class="title">{{ stats.bid_stats.total }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-warning-light">
+      <p>Pending</p>
+      <h3 class="title">{{ stats.bid_stats.pending }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-info-light">
+      <p>Accepted</p>
+      <h3 class="title">{{ stats.bid_stats.accepted }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-danger-light">
+      <p>Rejected</p>
+      <h3 class="title">{{ stats.bid_stats.rejected }}</h3>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box has-background-grey-light">
+      <p>Cancelled</p>
+      <h3 class="title">{{ stats.bid_stats.cancelled }}</h3>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
