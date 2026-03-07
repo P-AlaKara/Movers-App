@@ -1,258 +1,274 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .forms import MovingRequestForm, BidForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, generics
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 from .models import MovingRequest, Bid
-from profiles.models import MoverProfile, Profile
-from django.contrib import messages
+from .serializers import MovingRequestSerializer, MovingRequestListSerializer, BidSerializer
 from notifications.utils import create_notification
 
-# Create your views here.
-@login_required
-def create_request_view(request):
-    if request.user.profile.role != "customer":
-        return redirect("dashboard")
 
-    if request.method == "POST":
-        form = MovingRequestForm(request.POST)
-        if form.is_valid():
-            moving_request = form.save(commit=False)
-            moving_request.customer = request.user
-            moving_request.status = 'open'
-            moving_request.save()
-            return redirect("dashboard")
-        else:
-            print(form.errors)  # For debugging purposes
-    else:
-        form = MovingRequestForm()
+# Customer: Moving Requests 
 
-    return render(request, "jobs/create_request.html", {"form": form})
+class MovingRequestListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
 
-@login_required
-def request_list(request):
-    """
-    Show all moving requests created by the customer.
-    """
-    requests = MovingRequest.objects.filter(customer=request.user).order_by('-created_at')
-    return render(request, 'jobs/request_list.html', {'requests': requests})
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return MovingRequestSerializer
+        return MovingRequestListSerializer
 
-@login_required
-def request_detail(request, request_id):
-    moving_request = get_object_or_404(
-        MovingRequest,
-        id=request_id,
-        customer=request.user
-    )
+    def get_queryset(self):
+        return MovingRequest.objects.filter(
+            customer=self.request.user
+        ).order_by('-created_at')
 
-    bids = moving_request.bids.select_related('mover')
-
-    return render(request, 'jobs/request_detail.html', {
-        'request_obj': moving_request,
-        'bids': bids
-    })
-
-@login_required
-def available_jobs(request):
-    if request.user.profile.role != 'mover':
-        return redirect('dashboard')
-
-    mover_profile = request.user.moverprofile
-
-    jobs = MovingRequest.objects.filter(
-        status='open',
-        pickup_location__icontains=mover_profile.service_area
-    ).order_by('moving_date')
-
-    existing_bids = Bid.objects.filter(
-        mover=request.user,
-        moving_request__in=jobs
-    ).values_list('moving_request_id', flat=True)
-
-    return render(request, 'jobs/available_jobs.html', 
-                  {'jobs': jobs, 'existing_bids': existing_bids})
-
-@login_required
-def place_bid(request, request_id):
-    if request.user.profile.role != 'mover':
-        return redirect('dashboard')
-
-    moving_request = get_object_or_404(MovingRequest, id=request_id, status='open')
-
-    existing_bid = Bid.objects.filter(moving_request=moving_request, mover=request.user).first()
-    if existing_bid:
-        messages.error(request, "You have already placed a bid on this request.")
-        return redirect('available_jobs')
-
-    if request.method == 'POST':
-        form = BidForm(request.POST)
-        if form.is_valid():
-            bid = form.save(commit=False)
-            bid.moving_request = moving_request
-            bid.mover = request.user
-            bid.save()
-            
-            create_notification(
-                user=moving_request.customer,
-                message=f"New bid placed on your request #{moving_request.id}.",
-                link=f"/jobs/request_detail/{moving_request.id}"
-            )
-
-            return redirect('available_jobs')
-    else:
-        form = BidForm()
-
-    return render(request, 'jobs/place_bid.html', {
-        'form': form,
-        'request_obj': moving_request
-    })
+    def perform_create(self, serializer):
+        if self.request.user.profile.role != 'customer':
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only customers can create moving requests.")
+        serializer.save(customer=self.request.user, status='open')
 
 
-'''@login_required
-def accept_job(request, request_id):
-    """
-    Accept a moving job and create a JobAssignment.
-    """
-    if request.user.profile.role != 'mover':
-        return redirect('dashboard')  # or raise 403
+class MovingRequestDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MovingRequestSerializer
 
-    job_assignment = get_object_or_404(
-        JobAssignment,
-        moving_request__id=request_id,
-        mover=request.user
-    )
-
-    if job_assignment.status == 'assigned':
-        job_assignment.status = 'in_progress'
-        job_assignment.save()
-
-    return redirect('my_jobs')'''
-#THIS IS OBSOLETE, ACCEPTING A JOB IS NOW DONE BY THE CUSTOMER 
-
-@login_required
-def my_jobs(request):
-    if request.user.profile.role != 'mover':
-        return redirect('dashboard')
-
-    jobs = MovingRequest.objects.filter(
-        bids__mover=request.user,
-        bids__status='accepted',
-        status__in=['accepted', 'in_progress', 'completed']
-    ).distinct().order_by('-moving_date')
-
-    return render(request, 'jobs/my_jobs.html', {'jobs': jobs})
-
-@login_required
-def accept_bid(request, bid_id):
-    bid = get_object_or_404(Bid, id=bid_id)
-
-    if bid.moving_request.customer != request.user:
-        return redirect('dashboard')
-
-    if bid.moving_request.status != 'open':
-        return redirect('request_detail', request_id=bid.moving_request.id)
-
-    # Accept this bid
-    bid.status = 'accepted'
-    bid.save()
-
-    #create notification
-    create_notification(
-        user=bid.mover,
-        message=f"Your bid for request #{bid.moving_request.id} was accepted!",
-        link=f"/dashboard/"
-    )
-
-    # Reject all others
-    Bid.objects.filter(
-        moving_request=bid.moving_request
-    ).exclude(id=bid.id).update(status='rejected')
-
-    # Update request
-    bid.moving_request.status = 'accepted'
-    bid.moving_request.save()
-
-    return redirect('request_detail', request_id=bid.moving_request.id)
-
-@login_required
-def start_job(request, request_id):
-    job = get_object_or_404(
-        MovingRequest,
-        id=request_id,
-        bids__mover=request.user,
-        bids__status='accepted'
-    )
-
-    if job.status == 'accepted':
-        job.status = 'in_progress'
-        job.save()
-
-    create_notification(
-        user=job.customer,
-        message=f"Your move #{job.id} has started.",
-        link=f"/requests/{job.id}/"
-    )
-
-    return redirect('my_jobs')
-
-@login_required
-def complete_job(request, request_id):
-    """
-    Mover marks a job as completed.
-    """
-    if request.user.profile.role != 'mover':
-        return redirect('dashboard')
-
-    job = get_object_or_404(
-        MovingRequest, 
-        id=request_id,
-        bids__mover=request.user,
-        bids__status='accepted'
+    def get_object(self):
+        return get_object_or_404(
+            MovingRequest,
+            id=self.kwargs['request_id'],
+            customer=self.request.user
         )
 
-    if job.status == 'in_progress':
-        job.status = 'completed'
-        job.save()
 
-    create_notification(
-        user=job.customer,
-        message=f"Your move #{job.id} has been completed.",
-        link=f"/requests/{job.id}/"
-    )
+class CancelRequestView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    return redirect('my_jobs')
+    def post(self, request, request_id):
+        moving_request = get_object_or_404(
+            MovingRequest,
+            id=request_id,
+            customer=request.user
+        )
 
-@login_required
-def cancel_request(request, request_id):
-    moving_request = get_object_or_404(
-        MovingRequest,
-        id=request_id,
-        customer=request.user
-    )
+        if moving_request.status not in ['open', 'accepted']:
+            return Response(
+                {'error': 'Only open or accepted requests can be cancelled.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-    if moving_request.status in ['open', 'accepted']:
         moving_request.status = 'cancelled'
         moving_request.save()
 
-    #create notification for accepted mover
-    accepted_bid = moving_request.bids.filter(status='accepted').first()
-    if accepted_bid:
+        accepted_bid = moving_request.bids.filter(status='accepted').first()
+        if accepted_bid:
+            create_notification(
+                user=accepted_bid.mover,
+                message=f"The moving request #{moving_request.id} was cancelled.",
+                link=f"/dashboard/"
+            )
+
+        return Response({'detail': 'Request cancelled.'})
+
+
+# Mover: Available Jobs & Bidding
+
+class AvailableJobsView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MovingRequestListSerializer
+
+    def get_queryset(self):
+        if self.request.user.profile.role != 'mover':
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only movers can view available jobs.")
+
+        mover_profile = self.request.user.moverprofile
+        return MovingRequest.objects.filter(
+            status='open',
+            pickup_location__icontains=mover_profile.service_area
+        ).order_by('moving_date')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        # Attach existing_bids so frontend knows which jobs already have a bid
+        existing_bids = Bid.objects.filter(
+            mover=request.user,
+            moving_request__in=queryset
+        ).values_list('moving_request_id', flat=True)
+
+        return Response({
+            'jobs': serializer.data,
+            'already_bid': list(existing_bids)
+        })
+
+
+class PlaceBidView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, request_id):
+        if request.user.profile.role != 'mover':
+            return Response(
+                {'error': 'Only movers can place bids.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        moving_request = get_object_or_404(MovingRequest, id=request_id, status='open')
+
+        if Bid.objects.filter(moving_request=moving_request, mover=request.user).exists():
+            return Response(
+                {'error': 'You have already placed a bid on this request.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = BidSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(moving_request=moving_request, mover=request.user)
+            create_notification(
+                user=moving_request.customer,
+                message=f"New bid placed on your request #{moving_request.id}.",
+                link=f"/jobs/requests/{moving_request.id}/"
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CancelBidView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, bid_id):
+        bid = get_object_or_404(Bid, id=bid_id, mover=request.user)
+
+        if bid.status != 'pending':
+            return Response(
+                {'error': 'Only pending bids can be cancelled.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        bid.status = 'cancelled'
+        bid.save()
+        return Response({'detail': 'Bid cancelled.'})
+
+
+# Customer: Accept a Bid
+
+class AcceptBidView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, bid_id):
+        bid = get_object_or_404(Bid, id=bid_id)
+
+        if bid.moving_request.customer != request.user:
+            return Response(
+                {'error': 'You do not own this request.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if bid.moving_request.status != 'open':
+            return Response(
+                {'error': 'This request is no longer open.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        bid.status = 'accepted'
+        bid.save()
+
+        Bid.objects.filter(
+            moving_request=bid.moving_request
+        ).exclude(id=bid.id).update(status='rejected')
+
+        bid.moving_request.status = 'accepted'
+        bid.moving_request.save()
+
         create_notification(
-            user=accepted_bid.mover,
-            message=f"The moving request #{moving_request.id} was cancelled.",
+            user=bid.mover,
+            message=f"Your bid for request #{bid.moving_request.id} was accepted!",
             link=f"/dashboard/"
         )
 
-    return redirect('dashboard')
+        return Response({'detail': 'Bid accepted.'})
 
-@login_required
-def cancel_bid(request, request_id):
-    bid = get_object_or_404(
-        Bid,
-        id=request_id,
-        mover=request.user
-    )
 
-    if bid.status in ['pending']:
-        bid.status = 'cancelled'
-        bid.save()
+# Mover: Job Lifecycle
 
-    return redirect('dashboard')
+class MyJobsView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MovingRequestListSerializer
+
+    def get_queryset(self):
+        if self.request.user.profile.role != 'mover':
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only movers can view their jobs.")
+
+        return MovingRequest.objects.filter(
+            bids__mover=self.request.user,
+            bids__status='accepted',
+            status__in=['accepted', 'in_progress', 'completed']
+        ).distinct().order_by('-moving_date')
+
+
+class StartJobView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, request_id):
+        job = get_object_or_404(
+            MovingRequest,
+            id=request_id,
+            bids__mover=request.user,
+            bids__status='accepted'
+        )
+
+        if job.status != 'accepted':
+            return Response(
+                {'error': 'Job must be in accepted state to start.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        job.status = 'in_progress'
+        job.save()
+
+        create_notification(
+            user=job.customer,
+            message=f"Your move #{job.id} has started.",
+            link=f"/jobs/requests/{job.id}/"
+        )
+
+        return Response({'detail': 'Job started.'})
+
+
+class CompleteJobView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, request_id):
+        if request.user.profile.role != 'mover':
+            return Response(
+                {'error': 'Only movers can complete jobs.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        job = get_object_or_404(
+            MovingRequest,
+            id=request_id,
+            bids__mover=request.user,
+            bids__status='accepted'
+        )
+
+        if job.status != 'in_progress':
+            return Response(
+                {'error': 'Job must be in progress to complete.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        job.status = 'completed'
+        job.save()
+
+        create_notification(
+            user=job.customer,
+            message=f"Your move #{job.id} has been completed.",
+            link=f"/jobs/requests/{job.id}/"
+        )
+
+        return Response({'detail': 'Job completed.'})

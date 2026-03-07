@@ -1,33 +1,31 @@
 from django.urls import path
 from .views import (
-    create_request_view,
-    request_list,
-    request_detail,
-    available_jobs,
-    my_jobs,
-    complete_job, 
-    cancel_request,
-    place_bid,
-    accept_bid, 
-    cancel_bid,
-    start_job,
+    MovingRequestListCreateView,
+    MovingRequestDetailView,
+    CancelRequestView,
+    AvailableJobsView,
+    PlaceBidView,
+    AcceptBidView,
+    CancelBidView,
+    MyJobsView,
+    StartJobView,
+    CompleteJobView,
 )
 
 urlpatterns = [
-    # Customer request routes
-    path("requests/create/", create_request_view, name="create_request"),
-    path("requests/", request_list, name="request_list"),
-    path("requests/<int:request_id>/", request_detail, name="request_detail"),
-    path("requests/<int:request_id>/cancel/", cancel_request, name="cancel_request"),
+    # Customer: moving requests
+    path('requests/', MovingRequestListCreateView.as_view(), name='request-list-create'),
+    path('requests/<int:request_id>/', MovingRequestDetailView.as_view(), name='request-detail'),
+    path('requests/<int:request_id>/cancel/', CancelRequestView.as_view(), name='cancel-request'),
 
-    # Bidding system
-    path("jobs/available/", available_jobs, name="available_jobs"),
-    path("jobs/<int:request_id>/bid/", place_bid, name="place_bid"),
-    path("bids/<int:bid_id>/accept/", accept_bid, name="accept_bid"),
-    path("bids/<int:bid_id>/cancel/", cancel_bid, name="cancel_bid"),
+    # Mover: available jobs and bidding
+    path('available/', AvailableJobsView.as_view(), name='available-jobs'),
+    path('requests/<int:request_id>/bid/', PlaceBidView.as_view(), name='place-bid'),
+    path('bids/<int:bid_id>/accept/', AcceptBidView.as_view(), name='accept-bid'),
+    path('bids/<int:bid_id>/cancel/', CancelBidView.as_view(), name='cancel-bid'),
 
-    # Mover job lifecycle
-    path("jobs/my/", my_jobs, name="my_jobs"),
-    path("jobs/<int:request_id>/start/", start_job, name="start_job"),
-    path("jobs/<int:request_id>/complete/", complete_job, name="complete_job"),
+    # Mover: job lifecycle
+    path('my/', MyJobsView.as_view(), name='my-jobs'),
+    path('requests/<int:request_id>/start/', StartJobView.as_view(), name='start-job'),
+    path('requests/<int:request_id>/complete/', CompleteJobView.as_view(), name='complete-job'),
 ]
