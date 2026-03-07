@@ -1,25 +1,22 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from .forms import RegisterForm
-from profiles.models import MoverProfile
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import RegisterSerializer
 
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
 
-# Create your views here.
-def register_view(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-
-            role = form.cleaned_data.get("role")
-            user.profile.role = role
-            user.profile.save()
-
-            if role == 'mover':
-                MoverProfile.objects.create(user=user)
-
-            login(request, user)
-            return redirect('dashboard')  # Redirect to a success page after registration
-    else:
-        form = RegisterForm()
-    return render(request, 'accounts/register.html', {'form': form})
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            # Issue tokens immediately on registration
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'role': user.profile.role,
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
