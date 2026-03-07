@@ -131,4 +131,3 @@ Authorization: Token <your-token>
 * Email/SMS notification endpoints
 * Advanced search and filtering
 * API rate limiting
-* Production deployment (Gunicorn/uWSGI)
