@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from .models import MoverProfile
-from .serializers import ProfileSerializer, MoverProfileSerializer
+from .serializers import ProfileSerializer, MoverProfileSerializer, PublicMoverSerializer
 
 class MyProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -42,3 +42,27 @@ class MyProfileView(APIView):
             return Response(profile_serializer.data)
 
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class MoverListView(generics.ListAPIView):
+    serializer_class = PublicMoverSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = MoverProfile.objects.select_related('user', 'user__profile')
+        
+        # Optional filters via query params
+        service_area = self.request.query_params.get('service_area')
+        availability = self.request.query_params.get('availability')
+
+        if service_area:
+            qs = qs.filter(service_area__icontains=service_area)
+        if availability is not None:
+            qs = qs.filter(availability=availability.lower() == 'true')
+
+        return qs
+
+
+class MoverDetailView(generics.RetrieveAPIView):
+    serializer_class = PublicMoverSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = MoverProfile.objects.select_related('user', 'user__profile')
