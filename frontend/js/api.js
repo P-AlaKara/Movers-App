@@ -119,18 +119,3 @@ const api = {
         markAllRead: () => request('/notifications/read-all/', { method: 'POST' }),
     },
 };
-```
-
----
-
-A few things to note about how these work together. Every page will include both scripts and call `requireAuth()` at the top. Role-restricted pages call `requireRole('mover')` or `requireRole('customer')` instead. All API calls go through `api.something()` which internally calls `request()` which handles the token automatically — pages never touch tokens directly.
-
-**Commit message:**
-```
-feat(frontend): add auth.js and api.js as frontend foundation
-
-- auth.js handles token storage, decoding, expiry check, 
-  refresh, logout, and route protection
-- api.js centralizes all fetch calls with automatic token 
-  attachment and 401 retry logic
-- All endpoints mapped to named methods matching backend routes
