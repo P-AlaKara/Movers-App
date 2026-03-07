@@ -106,15 +106,6 @@ Empty response body
 - **Expiration:** Tokens do not expire by default (configurable)
 - **Storage:** Client should store token securely (localStorage, secure cookies, etc.)
 
-## Security Considerations
-
-- Always send tokens over HTTPS in production
-- Never expose tokens in URLs or logs
-- Regenerate tokens if compromised
-- Use secure storage mechanisms on client applications
-- Include token in Authorization header, not query parameters
-- Tokens are user-specific and should be treated as sensitive credentials
-
 ## Error Responses
 
 ### 401 Unauthorized
