@@ -6,12 +6,13 @@ from django.shortcuts import get_object_or_404
 from .models import MovingRequest, Bid
 from .serializers import MovingRequestSerializer, MovingRequestListSerializer, BidSerializer
 from notifications.utils import create_notification
+from .permissions import IsCustomer, IsMover
 
 
 # Customer: Moving Requests 
 
 class MovingRequestListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCustomer]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -24,14 +25,11 @@ class MovingRequestListCreateView(generics.ListCreateAPIView):
         ).order_by('-created_at')
 
     def perform_create(self, serializer):
-        if self.request.user.profile.role != 'customer':
-            from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only customers can create moving requests.")
         serializer.save(customer=self.request.user, status='open')
 
 
 class MovingRequestDetailView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCustomer]
     serializer_class = MovingRequestSerializer
 
     def get_object(self):
@@ -43,7 +41,7 @@ class MovingRequestDetailView(generics.RetrieveAPIView):
 
 
 class CancelRequestView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCustomer]
 
     def post(self, request, request_id):
         moving_request = get_object_or_404(
@@ -73,16 +71,11 @@ class CancelRequestView(APIView):
 
 
 # Mover: Available Jobs & Bidding
-
 class AvailableJobsView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMover]
     serializer_class = MovingRequestListSerializer
 
     def get_queryset(self):
-        if self.request.user.profile.role != 'mover':
-            from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only movers can view available jobs.")
-
         mover_profile = self.request.user.moverprofile
         return MovingRequest.objects.filter(
             status='open',
@@ -91,14 +84,20 @@ class AvailableJobsView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+        page = self.paginate_queryset(queryset)
 
-        # Attach existing_bids so frontend knows which jobs already have a bid
         existing_bids = Bid.objects.filter(
             mover=request.user,
             moving_request__in=queryset
         ).values_list('moving_request_id', flat=True)
 
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response = self.get_paginated_response(serializer.data)
+            response.data['already_bid'] = list(existing_bids)
+            return response
+
+        serializer = self.get_serializer(queryset, many=True)
         return Response({
             'jobs': serializer.data,
             'already_bid': list(existing_bids)
@@ -106,15 +105,9 @@ class AvailableJobsView(generics.ListAPIView):
 
 
 class PlaceBidView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMover]
 
     def post(self, request, request_id):
-        if request.user.profile.role != 'mover':
-            return Response(
-                {'error': 'Only movers can place bids.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
         moving_request = get_object_or_404(MovingRequest, id=request_id, status='open')
 
         if Bid.objects.filter(moving_request=moving_request, mover=request.user).exists():
@@ -137,7 +130,7 @@ class PlaceBidView(APIView):
 
 
 class CancelBidView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMover]
 
     def post(self, request, bid_id):
         bid = get_object_or_404(Bid, id=bid_id, mover=request.user)
@@ -154,9 +147,8 @@ class CancelBidView(APIView):
 
 
 # Customer: Accept a Bid
-
 class AcceptBidView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCustomer]
 
     def post(self, request, bid_id):
         bid = get_object_or_404(Bid, id=bid_id)
@@ -195,14 +187,10 @@ class AcceptBidView(APIView):
 # Mover: Job Lifecycle
 
 class MyJobsView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMover]
     serializer_class = MovingRequestListSerializer
 
     def get_queryset(self):
-        if self.request.user.profile.role != 'mover':
-            from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only movers can view their jobs.")
-
         return MovingRequest.objects.filter(
             bids__mover=self.request.user,
             bids__status='accepted',
@@ -211,7 +199,7 @@ class MyJobsView(generics.ListAPIView):
 
 
 class StartJobView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMover]
 
     def post(self, request, request_id):
         job = get_object_or_404(
@@ -240,15 +228,9 @@ class StartJobView(APIView):
 
 
 class CompleteJobView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMover]
 
     def post(self, request, request_id):
-        if request.user.profile.role != 'mover':
-            return Response(
-                {'error': 'Only movers can complete jobs.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
         job = get_object_or_404(
             MovingRequest,
             id=request_id,
